@@ -14,9 +14,10 @@ from
 	
 where
     post_type = 'shop_order' and
-    post_date BETWEEN '2021-05-19' AND '2021-06-18' and
+    post_date BETWEEN '2021-06-01' AND '2021-06-30' and
     post_status = 'wc-completed' AND 
-	cpm.meta_key = '_order_currency'
+    cpm.meta_key = '_order_currency' AND
+    cpm.meta_value = 'USD'
 	
 group by
     p.ID
