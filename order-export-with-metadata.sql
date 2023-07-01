@@ -4,6 +4,9 @@ SELECT
     DATE(p.post_date) AS post_date,
     cpm.meta_value AS currency,
     (SELECT GROUP_CONCAT(order_item_name SEPARATOR '|') FROM wp_filn_woocommerce_order_items WHERE order_id = p.ID) AS order_items,
+    MAX(CASE WHEN pm.meta_key = '_order_tax_rate_id' AND p.ID = pm.post_id THEN (
+    		SELECT meta_value FROM wp_filn_woocommerce_order_itemmeta WHERE order_item_id = oi.order_item_id AND meta_key = 'tax_rate_id'
+	) END) AS tax_name,
     MAX(CASE WHEN pm.meta_key = '_order_tax' AND p.ID = pm.post_id THEN pm.meta_value END) AS order_tax,
     DATE(MAX(CASE WHEN pm.meta_key = '_paid_date' AND p.ID = pm.post_id THEN pm.meta_value END)) AS paid_date,
     MAX(CASE WHEN pm.meta_key = '_order_total' AND p.ID = pm.post_id THEN pm.meta_value END) AS order_total
@@ -20,11 +23,11 @@ WHERE
     p.post_date BETWEEN '2021-06-01' AND '2021-06-30' AND
     p.post_status = 'wc-completed' AND 
     cpm.meta_key = '_order_currency' AND
-    cpm.meta_value = 'USD' AND
+    cpm.meta_value = 'CAD' AND
     cpm2.meta_key = '_billing_first_name' AND
     cpm3.meta_key = '_billing_last_name'
 GROUP BY
- 	p.ID
+     p.ID;
 //*****------------------------------------------------------
 select
     p.ID as order_id,
