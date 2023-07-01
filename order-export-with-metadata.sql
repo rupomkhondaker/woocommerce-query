@@ -1,3 +1,31 @@
+SELECT
+    p.ID AS order_id,
+    CONCAT( cpm2.meta_value ,' ', cpm3.meta_value) AS customer_name,
+    DATE(p.post_date) AS post_date,
+    cpm.meta_value AS currency,
+    (SELECT GROUP_CONCAT(order_item_name SEPARATOR '|') FROM wp_filn_woocommerce_order_items WHERE order_id = p.ID) AS order_items,
+    MAX(CASE WHEN pm.meta_key = '_order_tax' AND p.ID = pm.post_id THEN pm.meta_value END) AS order_tax,
+    DATE(MAX(CASE WHEN pm.meta_key = '_paid_date' AND p.ID = pm.post_id THEN pm.meta_value END)) AS paid_date,
+    MAX(CASE WHEN pm.meta_key = '_order_total' AND p.ID = pm.post_id THEN pm.meta_value END) AS order_total
+    
+FROM
+    wp_filn_posts p 
+    JOIN wp_filn_postmeta cpm ON p.ID = cpm.post_id
+    JOIN wp_filn_postmeta pm ON p.ID = pm.post_id
+    JOIN wp_filn_woocommerce_order_items oi ON p.ID = oi.order_id
+    JOIN wp_filn_postmeta cpm2 ON p.ID = cpm2.post_id
+    JOIN wp_filn_postmeta cpm3 ON p.ID = cpm3.post_id
+WHERE
+    p.post_type = 'shop_order' AND
+    p.post_date BETWEEN '2021-06-01' AND '2021-06-30' AND
+    p.post_status = 'wc-completed' AND 
+    cpm.meta_key = '_order_currency' AND
+    cpm.meta_value = 'USD' AND
+    cpm2.meta_key = '_billing_first_name' AND
+    cpm3.meta_key = '_billing_last_name'
+GROUP BY
+
+//*****------------------------------------------------------
 select
     p.ID as order_id,
     DATE(p.post_date) as post_date,
