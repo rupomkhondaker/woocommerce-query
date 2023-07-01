@@ -8,7 +8,7 @@ select
     max( CASE WHEN pm.meta_key = '_order_total' and p.ID = pm.post_id THEN pm.meta_value END ) as order_total
 from
     wp_filn_posts p 
-	JOIN wp_filn_postmeta cpm ON p.ID = cpm.post_id
+    JOIN wp_filn_postmeta cpm ON p.ID = cpm.post_id
     JOIN wp_filn_postmeta pm on p.ID = pm.post_id
     JOIN wp_filn_woocommerce_order_items oi on p.ID = oi.order_id
 	
@@ -72,9 +72,9 @@ select
     max( CASE WHEN pm.meta_key = '_paid_date' and p.ID = pm.post_id THEN pm.meta_value END ) as paid_date,
     ( select group_concat( order_item_name separator '|' ) from wp_woocommerce_order_items where order_id = p.ID ) as order_items
 from
-    wp_posts p 
-    join wp_postmeta pm on p.ID = pm.post_id
-    join wp_woocommerce_order_items oi on p.ID = oi.order_id
+    wp_filn_posts p 
+    join wp_filn_postmeta pm on p.ID = pm.post_id
+    join wp_filn_woocommerce_order_items oi on p.ID = oi.order_id
 where
     post_type = 'shop_order' and
     post_date BETWEEN '2015-01-01' AND '2015-07-08' and
@@ -82,3 +82,15 @@ where
     oi.order_item_name = 'Product Name'
 group by
     p.ID
+
+
+//---------------------------Export Inventory-------------------------------
+SELECT p.ID AS product_id, p.post_title AS product_name, pm1.meta_value AS stock_quantity
+FROM wp_filn_posts p
+INNER JOIN wp_filn_postmeta pm1 ON p.ID = pm1.post_id
+INNER JOIN wp_filn_postmeta pm2 ON p.ID = pm2.post_id
+WHERE p.post_type = 'product'
+AND p.post_status = 'publish'
+AND pm1.meta_key = '_stock'
+AND pm2.meta_key = '_stock_status'
+
