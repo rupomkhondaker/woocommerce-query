@@ -24,7 +24,7 @@ WHERE
     cpm2.meta_key = '_billing_first_name' AND
     cpm3.meta_key = '_billing_last_name'
 GROUP BY
-
+ 	p.ID
 //*****------------------------------------------------------
 select
     p.ID as order_id,
