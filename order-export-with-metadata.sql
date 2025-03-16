@@ -120,3 +120,43 @@ AND p.post_status = 'publish'
 AND pm1.meta_key = '_stock'
 AND pm2.meta_key = '_stock_status'
 
+
+//----------------------------------------Inventory with variations-----------------
+
+SELECT 
+    p.ID AS item_id,
+    p.post_title AS item_name,
+    CASE 
+        WHEN p.post_type = 'product_variation' THEN 
+            (SELECT post_title FROM wp_filn_posts WHERE ID = p.post_parent) 
+        ELSE p.post_title 
+    END AS product_name,
+    CASE 
+        WHEN p.post_type = 'product_variation' THEN 'variation'
+        ELSE 'product' 
+    END AS item_type,
+    pm_stock.meta_value AS stock_quantity,
+    pm_status.meta_value AS stock_status,
+    CASE 
+        WHEN p.post_type = 'product_variation' THEN 
+            (SELECT meta_value FROM wp_filn_postmeta WHERE post_id = p.post_parent AND meta_key = '_sku')
+        ELSE pm_sku.meta_value
+    END AS parent_sku,
+    pm_sku.meta_value AS item_sku,
+    pm_manage.meta_value AS manage_stock
+FROM 
+    wp_filn_posts p
+LEFT JOIN 
+    wp_filn_postmeta pm_stock ON p.ID = pm_stock.post_id AND pm_stock.meta_key = '_stock'
+LEFT JOIN 
+    wp_filn_postmeta pm_status ON p.ID = pm_status.post_id AND pm_status.meta_key = '_stock_status'
+LEFT JOIN 
+    wp_filn_postmeta pm_sku ON p.ID = pm_sku.post_id AND pm_sku.meta_key = '_sku'
+LEFT JOIN 
+    wp_filn_postmeta pm_manage ON p.ID = pm_manage.post_id AND pm_manage.meta_key = '_manage_stock'
+WHERE 
+    (p.post_type = 'product' OR p.post_type = 'product_variation')
+    AND p.post_status = 'publish'
+ORDER BY 
+    product_name, item_type DESC, item_name;
+
